@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillForge AI — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   ROOT TOKENS  (identical to homepage)
+═══════════════════════════════════════ */
+:root{
+  --bg:#0A0A0A;--bg2:#0F0F0F;--surf:#111111;--surf2:#161616;
+  --gold:#D4AF37;--gold2:#F59E0B;--gold3:#FDE68A;--goldD:#9A7D1A;
+  --text:#F5F5F5;--muted:#888888;--dim:#444444;
+  --border:rgba(212,175,55,0.15);--borderH:rgba(212,175,55,0.5);
+  --glow:0 0 40px rgba(212,175,55,0.18);--glowH:0 0 60px rgba(212,175,55,0.35);
+  --grad:linear-gradient(135deg,#D4AF37 0%,#F59E0B 50%,#FDE68A 100%);
+  --err:#ef4444;--ok:#34d399;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;cursor:none;min-height:100vh;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+
+/* ── CURSOR ── */
+#cur{position:fixed;width:10px;height:10px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference;transition:transform .1s;}
+#curR{position:fixed;width:36px;height:36px;border:1px solid rgba(212,175,55,0.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.15s ease;}
+body:has(button:hover) #curR,body:has(input:hover) #curR{transform:translate(-50%,-50%) scale(1.6);border-color:var(--gold);}
+
+/* ── BACKGROUND LAYERS ── */
+#bgl{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+#bgl::before{content:'';position:absolute;inset:-50%;background-image:linear-gradient(rgba(212,175,55,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,0.04) 1px,transparent 1px);background-size:80px 80px;transform:rotate(-12deg);animation:gridD 30s linear infinite;}
+@keyframes gridD{to{transform:rotate(-12deg) translateY(80px);}}
+#bgl::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:0.025;}
+.cg{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;opacity:0.12;}
+.cg1{width:600px;height:600px;background:var(--gold);top:-200px;right:-200px;animation:cgf 12s ease-in-out infinite;}
+.cg2{width:500px;height:500px;background:var(--gold2);bottom:-150px;left:-150px;animation:cgf 10s ease-in-out infinite reverse;}
+@keyframes cgf{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.1) translate(20px,-20px);}}
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;}
+
+/* ── NAVBAR ── */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:68px;border-bottom:1px solid var(--border);background:rgba(10,10,10,0.7);backdrop-filter:blur(24px);}
+.nwm{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;text-decoration:none;}
+.nwm em{font-style:italic;color:var(--text);font-weight:300;}
+.nbk{font-family:'DM Sans',sans-serif;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.72rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:.5rem 1.1rem;border-radius:6px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;}
+.nbk:hover{border-color:var(--borderH);color:var(--gold);}
+
+/* ══════════════════════════════
+   AUTH WRAPPER
+══════════════════════════════ */
+.auth-wrap{
+  position:relative;z-index:1;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:100px 1.5rem 4rem;
+}
+
+/* Split layout */
+.auth-split{
+  display:grid;
+  grid-template-columns:1fr 460px;
+  gap:4rem;
+  max-width:1000px;
+  width:100%;
+  align-items:center;
+}
+
+/* Left brand column */
+.auth-brand{}
+.auth-eyebrow{display:inline-flex;align-items:center;gap:.75rem;font-size:.7rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:1.75rem;animation:fu .6s ease both;}
+.auth-eyebrow::before,.auth-eyebrow::after{content:'';width:32px;height:1px;background:var(--gold);}
+.auth-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,6vw,5.5rem);font-weight:300;line-height:.95;letter-spacing:-2px;margin-bottom:1.5rem;animation:fu .6s .1s ease both;}
+.auth-title strong{font-weight:700;display:block;}
+.auth-title .gw{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:italic;}
+.auth-desc{font-size:.92rem;color:var(--muted);line-height:1.8;max-width:360px;margin-bottom:2.5rem;animation:fu .6s .2s ease both;}
+.auth-stats{display:flex;flex-direction:column;gap:1rem;animation:fu .6s .3s ease both;}
+.auth-stat{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:var(--surf);border:1px solid var(--border);border-radius:10px;transition:all .3s;position:relative;overflow:hidden;}
+.auth-stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--grad);}
+.auth-stat:hover{border-color:var(--borderH);transform:translateX(4px);}
+.auth-stat-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;width:60px;flex-shrink:0;}
+.auth-stat-l{font-size:.78rem;color:var(--muted);font-weight:500;letter-spacing:.3px;}
+
+/* ── CARD ── */
+.auth-card{
+  background:var(--surf);
+  border:1px solid var(--borderH);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.5),var(--glowH);
+  animation:fu .6s .15s ease both;
+  position:relative;
+}
+.card-topbar{height:3px;background:var(--grad);}
+.card-body{padding:2.5rem;}
+
+/* Tab switcher */
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:2rem;gap:2px;}
+.auth-tab{font-family:'DM Sans',sans-serif;background:transparent;border:none;color:var(--muted);font-size:.78rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.65rem;border-radius:7px;cursor:pointer;transition:all .25s;}
+.auth-tab.active{background:rgba(212,175,55,.1);color:var(--gold);box-shadow:0 0 20px rgba(212,175,55,.08);}
+.auth-tab:hover:not(.active){color:var(--text);}
+
+/* Forms */
+.auth-form{display:none;animation:fu .35s ease both;}
+.auth-form.active{display:block;}
+
+.field{margin-bottom:1.1rem;}
+.field-label{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:.45rem;}
+.field-wrap{position:relative;}
+.field-icon{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);font-size:.95rem;opacity:.5;pointer-events:none;}
+.field-input{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);border-radius:10px;
+  padding:.8rem 1rem .8rem 2.6rem;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;
+  outline:none;transition:all .25s;
+}
+.field-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.1);}
+.field-input::placeholder{color:var(--dim);}
+.field-input.err{border-color:var(--err);box-shadow:0 0 0 3px rgba(239,68,68,.1);}
+.field-input.ok{border-color:var(--ok);}
+.field-err{font-size:.68rem;color:var(--err);margin-top:.35rem;display:none;letter-spacing:.3px;}
+.field-err.show{display:block;}
+
+/* Password toggle */
+.pw-toggle{position:absolute;right:.85rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:0;transition:color .2s;line-height:1;}
+.pw-toggle:hover{color:var(--gold);}
+
+/* Strength bar */
+.pw-strength{margin-top:.5rem;}
+.pw-strength-bar{height:3px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden;margin-bottom:.3rem;}
+.pw-strength-fill{height:100%;width:0;border-radius:100px;transition:width .4s,background .4s;}
+.pw-strength-txt{font-size:.62rem;color:var(--muted);letter-spacing:.5px;}
+
+/* Checkbox */
+.field-check{display:flex;align-items:flex-start;gap:.65rem;cursor:pointer;font-size:.8rem;color:var(--muted);line-height:1.5;}
+.field-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);flex-shrink:0;margin-top:2px;cursor:pointer;}
+.field-check a{color:var(--gold);text-decoration:none;}
+.field-check a:hover{text-decoration:underline;}
+
+/* Divider */
+.or-div{display:flex;align-items:center;gap:.75rem;margin:1.4rem 0;color:var(--dim);font-size:.72rem;letter-spacing:1px;}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Submit btn */
+.btn-submit{
+  width:100%;font-family:'DM Sans',sans-serif;
+  background:var(--grad);border:none;color:#000;
+  font-size:.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  padding:1rem;border-radius:10px;cursor:pointer;
+  position:relative;overflow:hidden;transition:all .3s;
+  box-shadow:0 0 30px rgba(212,175,55,.25);
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  margin-top:1.25rem;
+}
+.btn-submit:hover{box-shadow:0 0 50px rgba(212,175,55,.45);transform:translateY(-2px);}
+.btn-submit:active{transform:translateY(0);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-submit .arrow{display:inline-block;transition:transform .3s;}
+.btn-submit:hover .arrow{transform:translateX(4px);}
+
+/* Spinner inside btn */
+.btn-spinner{width:18px;height:18px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Social btns */
+.social-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;}
+.btn-social{font-family:'DM Sans',sans-serif;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-weight:600;padding:.7rem;border-radius:9px;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:.45rem;letter-spacing:.3px;}
+.btn-social:hover{border-color:var(--borderH);color:var(--text);}
+
+/* Switch link */
+.switch-link{text-align:center;margin-top:1.5rem;font-size:.78rem;color:var(--muted);}
+.switch-link button{background:none;border:none;color:var(--gold);cursor:pointer;font-weight:700;font-size:.78rem;text-decoration:underline;text-underline-offset:3px;transition:opacity .2s;}
+.switch-link button:hover{opacity:.75;}
+
+/* Success screen */
+.success-screen{text-align:center;padding:1rem 0;display:none;}
+.success-screen.show{display:block;}
+.success-icon{font-size:3rem;margin-bottom:1rem;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;margin-bottom:.5rem;}
+.success-sub{font-size:.85rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem;}
+.success-user{display:inline-block;padding:.35rem 1rem;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:100px;font-size:.78rem;color:var(--gold);font-weight:700;margin-bottom:1.25rem;}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:2rem;right:2rem;z-index:3000;display:flex;flex-direction:column;gap:.65rem;pointer-events:none;}
+.toast{background:var(--surf2);border:1px solid var(--borderH);border-radius:10px;padding:.85rem 1.2rem;font-size:.83rem;font-weight:500;color:var(--text);box-shadow:0 8px 30px rgba(0,0,0,.5),var(--glow);animation:tIn .3s ease;display:flex;align-items:center;gap:.6rem;max-width:300px;pointer-events:all;}
+.toast.err-t{border-color:rgba(239,68,68,.4);}
+.toast.ok-t{border-color:rgba(52,211,153,.4);}
+.toast.out{animation:tOut .3s ease forwards;}
+@keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tOut{to{opacity:0;transform:translateX(20px)}}
+
+/* ── ANIMATIONS ── */
+@keyframes fu{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:800px){
+  .auth-split{grid-template-columns:1fr;gap:2.5rem;}
+  .auth-brand{text-align:center;}
+  .auth-eyebrow,.auth-desc{margin-left:auto;margin-right:auto;}
+  .auth-stats{flex-direction:row;flex-wrap:wrap;justify-content:center;}
+  .auth-stat{flex:1;min-width:140px;}
+}
+@media(max-width:520px){
+  #navbar{padding:0 1.25rem;}
+  .auth-wrap{padding:90px 1rem 3rem;}
+  .card-body{padding:1.75rem 1.25rem;}
+  .auth-stats{display:none;}
+}
+
+/* ── SQL SCHEMA TOOLTIP ── */
+.sql-badge{
+  position:fixed;bottom:2rem;left:2rem;z-index:500;
+  background:var(--surf);border:1px solid var(--border);
+  border-radius:10px;padding:.6rem .9rem;
+  font-family:'Space Mono',monospace;font-size:.58rem;
+  color:var(--dim);letter-spacing:.5px;cursor:pointer;
+  transition:all .3s;
+}
+.sql-badge:hover{border-color:var(--borderH);color:var(--gold);}
+.sql-panel{
+  position:fixed;bottom:5rem;left:2rem;z-index:499;
+  background:#0d1117;border:1px solid rgba(212,175,55,.25);
+  border-radius:12px;padding:1.25rem;max-width:420px;
+  font-family:'Space Mono',monospace;font-size:.65rem;line-height:1.8;
+  color:#e6edf3;display:none;box-shadow:0 20px 60px rgba(0,0,0,.7);
+  max-height:65vh;overflow-y:auto;
+}
+.sql-panel.open{display:block;animation:fu .2s ease both;}
+.sql-kw{color:#ff7b72;}
+.sql-type{color:#ffa657;}
+.sql-str{color:#a5d6ff;}
+.sql-cmt{color:#8b949e;}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="curR"></div>
+<div id="bgl"></div>
+<div class="cg cg1"></div>
+<div class="cg cg2"></div>
+<canvas id="particles"></canvas>
+<div id="toasts"></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a class="nwm" href="skillforge-auth.html">Skill<em>Forge</em> AI</a>
+  <a class="nbk" href="javascript:void(0)" onclick="window.location.href='#'">← Back to Home</a>
+</nav>
+
+<!-- SQL SCHEMA BADGE -->
+<div class="sql-badge" onclick="toggleSQL()" title="View SQL Schema">🗄 SQL Schema</div>
+<div class="sql-panel" id="sqlPanel">
+<span class="sql-cmt">-- SkillForge AI Database Schema</span>
+<span class="sql-cmt">-- Engine: PostgreSQL / MySQL / SQLite</span>
+
+<span class="sql-kw">CREATE TABLE</span> users (
+  id          <span class="sql-type">SERIAL PRIMARY KEY</span>,
+  name        <span class="sql-type">VARCHAR(120) NOT NULL</span>,
+  email       <span class="sql-type">VARCHAR(255) NOT NULL UNIQUE</span>,
+  phone       <span class="sql-type">VARCHAR(20)</span>,
+  password_hash <span class="sql-type">VARCHAR(255) NOT NULL</span>,
+  created_at  <span class="sql-type">TIMESTAMP DEFAULT NOW()</span>,
+  updated_at  <span class="sql-type">TIMESTAMP DEFAULT NOW()</span>,
+  is_verified <span class="sql-type">BOOLEAN DEFAULT FALSE</span>,
+  avatar_url  <span class="sql-type">TEXT</span>
+);
+
+<span class="sql-kw">CREATE TABLE</span> sessions (
+  id          <span class="sql-type">SERIAL PRIMARY KEY</span>,
+  user_id     <span class="sql-type">INT REFERENCES</span> users(id),
+  token       <span class="sql-type">VARCHAR(255) NOT NULL UNIQUE</span>,
+  expires_at  <span class="sql-type">TIMESTAMP NOT NULL</span>,
+  created_at  <span class="sql-type">TIMESTAMP DEFAULT NOW()</span>
+);
+
+<span class="sql-kw">CREATE TABLE</span> submissions (
+  id          <span class="sql-type">SERIAL PRIMARY KEY</span>,
+  user_id     <span class="sql-type">INT REFERENCES</span> users(id),
+  task_id     <span class="sql-type">VARCHAR(50) NOT NULL</span>,
+  role        <span class="sql-type">VARCHAR(50)</span>,
+  score       <span class="sql-type">INT</span>,
+  link        <span class="sql-type">TEXT</span>,
+  feedback    <span class="sql-type">TEXT</span>,
+  submitted_at <span class="sql-type">TIMESTAMP DEFAULT NOW()</span>
+);
+
+<span class="sql-cmt">-- Indexes for performance</span>
+<span class="sql-kw">CREATE INDEX</span> idx_users_email
+  <span class="sql-kw">ON</span> users(email);
+<span class="sql-kw">CREATE INDEX</span> idx_sessions_user
+  <span class="sql-kw">ON</span> sessions(user_id);
+<span class="sql-kw">CREATE INDEX</span> idx_subs_user
+  <span class="sql-kw">ON</span> submissions(user_id);
+
+<span class="sql-cmt">-- bcrypt hashed passwords only</span>
+<span class="sql-cmt">-- Never store plaintext passwords</span>
+</div>
+
+<!-- AUTH LAYOUT -->
+<div class="auth-wrap">
+  <div class="auth-split">
+
+    <!-- LEFT: BRAND -->
+    <div class="auth-brand">
+      <div class="auth-eyebrow">Secure Access</div>
+      <h1 class="auth-title">
+        Your<br>
+        <span class="gw">Career</span><br>
+        <strong>Starts Here.</strong>
+      </h1>
+      <p class="auth-desc">
+        Join 12,000+ students proving their skills with real tasks, AI evaluation, and verifiable certificates that recruiters actually trust.
+      </p>
+      <div class="auth-stats">
+        <div class="auth-stat">
+          <div class="auth-stat-n">12K+</div>
+          <div class="auth-stat-l">Students Verified</div>
+        </div>
+        <div class="auth-stat">
+          <div class="auth-stat-n">98%</div>
+          <div class="auth-stat-l">Recruiter Trust Rate</div>
+        </div>
+        <div class="auth-stat">
+          <div class="auth-stat-n">3</div>
+          <div class="auth-stat-l">Internship Tracks</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CARD -->
+    <div class="auth-card">
+      <div class="card-topbar"></div>
+      <div class="card-body">
+
+        <!-- TABS -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+          <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Register</button>
+        </div>
+
+        <!-- SUCCESS SCREEN (shared) -->
+        <div class="success-screen" id="successScreen">
+          <div class="success-icon">🏆</div>
+          <div class="success-title">Welcome to SkillForge!</div>
+          <div class="success-user" id="successName">—</div>
+          <p class="success-sub">Your account is ready. You're now logged in and ready to start your first internship track.</p>
+          <button class="btn-submit" onclick="goToApp()" style="margin-top:0">
+            <span>Enter Platform</span>
+            <span class="arrow">→</span>
+          </button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form class="auth-form active" id="form-login" onsubmit="return false;" autocomplete="on">
+          <div class="field">
+            <label class="field-label">Email Address</label>
+            <div class="field-wrap">
+              <span class="field-icon">✉</span>
+              <input class="field-input" id="l-email" type="email" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="field-err" id="l-email-err">Enter a valid email address.</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Password</label>
+            <div class="field-wrap">
+              <span class="field-icon">🔒</span>
+              <input class="field-input" id="l-pass" type="password" placeholder="Your password" autocomplete="current-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('l-pass',this)">👁</button>
+            </div>
+            <div class="field-err" id="l-pass-err">Password is required.</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+            <label class="field-check">
+              <input type="checkbox" id="l-remember"> Remember me
+            </label>
+            <button type="button" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">Forgot password?</button>
+          </div>
+
+          <button class="btn-submit" id="btn-login" onclick="doLogin()">
+            <div class="btn-spinner" id="login-spinner"></div>
+            <span id="login-label">Sign In</span>
+            <span class="arrow" id="login-arrow">→</span>
+          </button>
+
+          <div class="or-div">or continue with</div>
+          <div class="social-row">
+            <button type="button" class="btn-social" onclick="socialAuth('Google')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Google
+            </button>
+            <button type="button" class="btn-social" onclick="socialAuth('GitHub')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+              GitHub
+            </button>
+          </div>
+          <div class="switch-link">
+            New here? <button onclick="switchTab('signup')">Create an account</button>
+          </div>
+        </form>
+
+        <!-- SIGNUP FORM -->
+        <form class="auth-form" id="form-signup" onsubmit="return false;" autocomplete="on">
+          <div class="field">
+            <label class="field-label">Full Name</label>
+            <div class="field-wrap">
+              <span class="field-icon">👤</span>
+              <input class="field-input" id="s-name" type="text" placeholder="Arjun Mehta" autocomplete="name">
+            </div>
+            <div class="field-err" id="s-name-err">Enter your full name.</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Email Address</label>
+            <div class="field-wrap">
+              <span class="field-icon">✉</span>
+              <input class="field-input" id="s-email" type="email" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="field-err" id="s-email-err">Enter a valid email address.</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Phone Number</label>
+            <div class="field-wrap">
+              <span class="field-icon">📱</span>
+              <input class="field-input" id="s-phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel">
+            </div>
+            <div class="field-err" id="s-phone-err">Enter a valid phone number.</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Password</label>
+            <div class="field-wrap">
+              <span class="field-icon">🔒</span>
+              <input class="field-input" id="s-pass" type="password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="checkStrength(this.value)">
+              <button type="button" class="pw-toggle" onclick="togglePw('s-pass',this)">👁</button>
+            </div>
+            <div class="pw-strength">
+              <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+              <div class="pw-strength-txt" id="pw-txt">Enter a password</div>
+            </div>
+            <div class="field-err" id="s-pass-err">Password must be at least 8 characters.</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Confirm Password</label>
+            <div class="field-wrap">
+              <span class="field-icon">🔒</span>
+              <input class="field-input" id="s-pass2" type="password" placeholder="Repeat password" autocomplete="new-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('s-pass2',this)">👁</button>
+            </div>
+            <div class="field-err" id="s-pass2-err">Passwords do not match.</div>
+          </div>
+          <div class="field" style="margin-top:.25rem">
+            <label class="field-check">
+              <input type="checkbox" id="s-terms">
+              I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+            </label>
+            <div class="field-err" id="s-terms-err">You must accept the terms to continue.</div>
+          </div>
+
+          <button class="btn-submit" id="btn-signup" onclick="doSignup()">
+            <div class="btn-spinner" id="signup-spinner"></div>
+            <span id="signup-label">Create Account</span>
+            <span class="arrow" id="signup-arrow">→</span>
+          </button>
+
+          <div class="or-div">or sign up with</div>
+          <div class="social-row">
+            <button type="button" class="btn-social" onclick="socialAuth('Google')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Google
+            </button>
+            <button type="button" class="btn-social" onclick="socialAuth('GitHub')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+              GitHub
+            </button>
+          </div>
+          <div class="switch-link">
+            Already have an account? <button onclick="switchTab('login')">Sign in</button>
+          </div>
+        </form>
+
+      </div><!-- /card-body -->
+    </div><!-- /auth-card -->
+  </div><!-- /auth-split -->
+</div><!-- /auth-wrap -->
+
+<!-- ═══════════════════════════════
+     BACKEND SQL NOTE (comment block)
+     ─────────────────────────────
+  To wire up a real backend, connect
+  the doLogin() / doSignup() functions
+  below to your Express/FastAPI routes:
+
+  POST /api/auth/register  → INSERT INTO users
+  POST /api/auth/login     → SELECT + bcrypt compare
+  GET  /api/auth/me        → SELECT via session token
+
+  See SQL schema via the badge (bottom-left)
+═══════════════════════════════ -->
+
+<script>
+/* ──────────────────────────────────────
+   CURSOR
+──────────────────────────────────────── */
+const C=document.getElementById('cur'),CR=document.getElementById('curR');
+document.addEventListener('mousemove',e=>{
+  C.style.left=e.clientX+'px'; C.style.top=e.clientY+'px';
+  setTimeout(()=>{CR.style.left=e.clientX+'px';CR.style.top=e.clientY+'px';},60);
+});
+
+/* ──────────────────────────────────────
+   PARTICLES
+──────────────────────────────────────── */
+(()=>{
+  const cv=document.getElementById('particles'),ctx=cv.getContext('2d');
+  let W,H,pts=[];
+  const rsz=()=>{W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;};
+  rsz(); window.addEventListener('resize',rsz);
+  for(let i=0;i<55;i++) pts.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.3,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,a:Math.random()});
+  (function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.a+=.005;
+      if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(212,175,55,${.25+.2*Math.sin(p.a)})`; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  })();
+})();
+
+/* ──────────────────────────────────────
+   IN-MEMORY "DATABASE" (localStorage)
+   Simulates SQL backend in browser.
+   Replace with real API calls in prod.
+──────────────────────────────────────── */
+const DB = {
+  getUsers(){ try{return JSON.parse(localStorage.getItem('sf_users')||'[]')}catch{return[]} },
+  saveUsers(u){ localStorage.setItem('sf_users',JSON.stringify(u)); },
+  findByEmail(email){ return this.getUsers().find(u=>u.email.toLowerCase()===email.toLowerCase()); },
+  insert(user){
+    const users=this.getUsers();
+    user.id = Date.now();
+    user.created_at = new Date().toISOString();
+    user.is_verified = false;
+    users.push(user);
+    this.saveUsers(users);
+    return user;
+  },
+  /* Simple hash simulation — in production use bcrypt server-side */
+  hashPw(pw){ return btoa(pw+':sf_salt_2024'); },
+  checkPw(pw,hash){ return btoa(pw+':sf_salt_2024')===hash; }
+};
+
+/* Session */
+const Session = {
+  set(user){ localStorage.setItem('sf_session',JSON.stringify({id:user.id,name:user.name,email:user.email})); },
+  get(){ try{return JSON.parse(localStorage.getItem('sf_session')||'null')}catch{return null;} },
+  clear(){ localStorage.removeItem('sf_session'); }
+};
+
+/* ──────────────────────────────────────
+   UI HELPERS
+──────────────────────────────────────── */
+function switchTab(t){
+  document.getElementById('tab-login').classList.toggle('active',t==='login');
+  document.getElementById('tab-signup').classList.toggle('active',t==='signup');
+  document.getElementById('form-login').classList.toggle('active',t==='login');
+  document.getElementById('form-signup').classList.toggle('active',t==='signup');
+  document.getElementById('successScreen').classList.remove('show');
+  clearErrors();
+}
+
+function clearErrors(){
+  document.querySelectorAll('.field-err').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.field-input').forEach(i=>{i.classList.remove('err');i.classList.remove('ok');});
+}
+
+function showErr(id,msg){
+  const el=document.getElementById(id); if(!el)return;
+  el.textContent=msg; el.classList.add('show');
+  const inp=el.closest('.field')?.querySelector('.field-input');
+  if(inp){inp.classList.add('err');inp.classList.remove('ok');}
+}
+
+function setOk(inputId){
+  const inp=document.getElementById(inputId);
+  if(inp){inp.classList.remove('err');inp.classList.add('ok');}
+}
+
+function togglePw(id,btn){
+  const inp=document.getElementById(id);
+  if(!inp)return;
+  inp.type=inp.type==='password'?'text':'password';
+  btn.textContent=inp.type==='password'?'👁':'🙈';
+}
+
+function checkStrength(pw){
+  const fill=document.getElementById('pw-fill'), txt=document.getElementById('pw-txt');
+  if(!fill)return;
+  let score=0;
+  if(pw.length>=8)score++;
+  if(/[A-Z]/.test(pw))score++;
+  if(/[0-9]/.test(pw))score++;
+  if(/[^A-Za-z0-9]/.test(pw))score++;
+  const labels=['Weak','Fair','Good','Strong'];
+  const colors=['#ef4444','#f59e0b','#3b82f6','#34d399'];
+  const widths=['25%','50%','75%','100%'];
+  fill.style.width=pw?widths[Math.max(score-1,0)]:'0';
+  fill.style.background=pw?colors[Math.max(score-1,0)]:'transparent';
+  txt.textContent=pw?labels[Math.max(score-1,0)]:'Enter a password';
+  txt.style.color=pw?colors[Math.max(score-1,0)]:'var(--muted)';
+}
+
+function toast(msg,type=''){
+  const el=document.createElement('div');
+  el.className='toast'+(type?' '+type+'-t':'');
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},3200);
+}
+
+function setBtnLoading(btnId,spinnerId,labelId,arrowId,loading){
+  const btn=document.getElementById(btnId);
+  const sp=document.getElementById(spinnerId);
+  const lb=document.getElementById(labelId);
+  const ar=document.getElementById(arrowId);
+  btn.disabled=loading;
+  sp.style.display=loading?'block':'none';
+  lb.style.opacity=loading?'0':'1';
+  if(ar)ar.style.display=loading?'none':'inline-block';
+}
+
+function showSuccess(name){
+  document.getElementById('form-login').classList.remove('active');
+  document.getElementById('form-signup').classList.remove('active');
+  document.getElementById('successName').textContent=name;
+  document.getElementById('successScreen').classList.add('show');
+}
+
+function goToApp(){
+  toast('Redirecting to platform… 🚀','ok');
+  setTimeout(()=>{ window.location.href='index.html'; }, 1200);
+}
+
+/* ──────────────────────────────────────
+   VALIDATION
+──────────────────────────────────────── */
+function validateEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function validatePhone(p){ return /^[\+]?[\d\s\-\(\)]{7,15}$/.test(p); }
+
+/* ──────────────────────────────────────
+   LOGIN
+──────────────────────────────────────── */
+async function doLogin(){
+  clearErrors();
+  const email=document.getElementById('l-email').value.trim();
+  const pass=document.getElementById('l-pass').value;
+  let ok=true;
+
+  if(!validateEmail(email)){ showErr('l-email-err','Enter a valid email address.'); ok=false; }
+  else setOk('l-email');
+
+  if(!pass){ showErr('l-pass-err','Password is required.'); ok=false; }
+  else setOk('l-pass');
+
+  if(!ok) return;
+
+  setBtnLoading('btn-login','login-spinner','login-label','login-arrow',true);
+
+  /* Simulate API call → SELECT * FROM users WHERE email=? */
+  await delay(1200);
+
+  const user = DB.findByEmail(email);
+  if(!user || !DB.checkPw(pass, user.password_hash)){
+    showErr('l-pass-err','Incorrect email or password.');
+    toast('Login failed — check credentials','err');
+    setBtnLoading('btn-login','login-spinner','login-label','login-arrow',false);
+    return;
+  }
+
+  Session.set(user);
+  setBtnLoading('btn-login','login-spinner','login-label','login-arrow',false);
+  toast('Welcome back, '+user.name.split(' ')[0]+' 👋','ok');
+  showSuccess(user.name);
+}
+
+/* ──────────────────────────────────────
+   SIGNUP
+──────────────────────────────────────── */
+async function doSignup(){
+  clearErrors();
+  const name   = document.getElementById('s-name').value.trim();
+  const email  = document.getElementById('s-email').value.trim();
+  const phone  = document.getElementById('s-phone').value.trim();
+  const pass   = document.getElementById('s-pass').value;
+  const pass2  = document.getElementById('s-pass2').value;
+  const terms  = document.getElementById('s-terms').checked;
+  let ok=true;
+
+  if(!name){ showErr('s-name-err','Enter your full name.'); ok=false; } else setOk('s-name');
+  if(!validateEmail(email)){ showErr('s-email-err','Enter a valid email address.'); ok=false; } else setOk('s-email');
+  if(phone && !validatePhone(phone)){ showErr('s-phone-err','Enter a valid phone number.'); ok=false; } else if(phone) setOk('s-phone');
+  if(pass.length<8){ showErr('s-pass-err','Password must be at least 8 characters.'); ok=false; } else setOk('s-pass');
+  if(pass!==pass2){ showErr('s-pass2-err','Passwords do not match.'); ok=false; } else if(pass2) setOk('s-pass2');
+  if(!terms){ showErr('s-terms-err','You must accept the terms to continue.'); ok=false; }
+  if(!ok) return;
+
+  setBtnLoading('btn-signup','signup-spinner','signup-label','signup-arrow',true);
+
+  /* Simulate API call → INSERT INTO users */
+  await delay(1500);
+
+  if(DB.findByEmail(email)){
+    showErr('s-email-err','An account with this email already exists.');
+    toast('Email already registered','err');
+    setBtnLoading('btn-signup','signup-spinner','signup-label','signup-arrow',false);
+    return;
+  }
+
+  const user = DB.insert({
+    name,
+    email,
+    phone: phone||null,
+    password_hash: DB.hashPw(pass)
+  });
+
+  Session.set(user);
+  setBtnLoading('btn-signup','signup-spinner','signup-label','signup-arrow',false);
+  toast('Account created! Welcome '+name.split(' ')[0]+' 🎉','ok');
+  showSuccess(name);
+}
+
+/* ──────────────────────────────────────
+   SOCIAL AUTH (placeholder)
+──────────────────────────────────────── */
+function socialAuth(provider){
+  toast('Connecting to '+provider+'… (demo mode)');
+}
+
+/* ──────────────────────────────────────
+   SQL SCHEMA PANEL
+──────────────────────────────────────── */
+function toggleSQL(){
+  const p=document.getElementById('sqlPanel');
+  p.classList.toggle('open');
+}
+
+/* ──────────────────────────────────────
+   UTILS
+──────────────────────────────────────── */
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* ── Check if user is already logged in ── */
+window.addEventListener('DOMContentLoaded',()=>{
+  const sess = Session.get();
+  if(sess){
+    showSuccess(sess.name);
+    toast('You\'re already signed in as '+sess.name.split(' ')[0],'ok');
+  }
+});
+</script>
+
+<!-- ═══════════════════════════════════════
+  BACKEND INTEGRATION GUIDE (for devs)
+  ════════════════════════════════════════
+
+  EXPRESS.JS ROUTES TO WIRE UP:
+
+  // Register
+  app.post('/api/auth/register', async (req,res)=>{
+    const {name,email,phone,password}=req.body;
+    const hash=await bcrypt.hash(password,12);
+    await db.query(
+      'INSERT INTO users(name,email,phone,password_hash) VALUES(?,?,?,?)',
+      [name,email,phone,hash]
+    );
+    res.json({ok:true});
+  });
+
+  // Login
+  app.post('/api/auth/login', async (req,res)=>{
+    const {email,password}=req.body;
+    const user=await db.query('SELECT * FROM users WHERE email=?',[email]);
+    const match=await bcrypt.compare(password,user.password_hash);
+    if(!match) return res.status(401).json({error:'Invalid credentials'});
+    const token=crypto.randomUUID();
+    await db.query(
+      'INSERT INTO sessions(user_id,token,expires_at) VALUES(?,?,?)',
+      [user.id,token,new Date(Date.now()+7*86400000)]
+    );
+    res.json({token,user:{id:user.id,name:user.name,email:user.email}});
+  });
+
+  Replace doLogin() / doSignup() fetch calls
+  to point to these routes and remove localStorage simulation.
+════════════════════════════════════════ -->
+</body>
+</html>

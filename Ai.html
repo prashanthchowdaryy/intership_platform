@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillForge AI — Intelligence Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#050505;--bg2:#080808;--surf:#0D0D0D;--surf2:#111;--surf3:#161616;
+  --gold:#C9A84C;--gold2:#E8C96A;--gold3:#F5E0A0;--goldD:#8A6E2A;
+  --text:#F0EDE8;--muted:#6B6560;--dim:#2a2a2a;
+  --border:rgba(201,168,76,0.12);--borderH:rgba(201,168,76,0.4);
+  --glow:0 0 40px rgba(201,168,76,0.12);--glowH:0 0 60px rgba(201,168,76,0.28);
+  --grad:linear-gradient(135deg,#C9A84C 0%,#E8C96A 50%,#F5E0A0 100%);
+  --err:#ef4444;--ok:#34d399;
+  --r:12px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;}
+::-webkit-scrollbar{width:2px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--gold);}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* GRID BG */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);background-size:60px 60px;}
+
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:64px;border-bottom:1px solid var(--border);background:rgba(5,5,5,0.85);backdrop-filter:blur(20px);}
+.nwm{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:4px;color:var(--gold);text-decoration:none;}
+.nwm span{color:var(--text);}
+.nbk{font-family:'DM Sans',sans-serif;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:.45rem 1rem;border-radius:6px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.nbk:hover{border-color:var(--borderH);color:var(--gold);}
+
+/* HERO HEADER */
+.suite-header{position:relative;z-index:1;padding:8rem 3rem 3rem;text-align:center;}
+.suite-eyebrow{display:inline-flex;align-items:center;gap:.75rem;font-family:'Space Mono',monospace;font-size:.6rem;color:var(--gold);letter-spacing:4px;text-transform:uppercase;margin-bottom:1.5rem;}
+.suite-eyebrow::before,.suite-eyebrow::after{content:'';width:30px;height:1px;background:var(--gold);opacity:.5;}
+.suite-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,8vw,7rem);letter-spacing:3px;line-height:.9;margin-bottom:.5rem;}
+.suite-title em{font-family:'Instrument Serif',serif;font-weight:400;font-style:italic;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.suite-sub{font-size:.9rem;color:var(--muted);line-height:1.8;max-width:500px;margin:1.5rem auto 0;}
+
+/* TABS */
+.tabs-wrap{position:relative;z-index:1;display:flex;justify-content:center;gap:.5rem;padding:2rem 1rem;flex-wrap:wrap;}
+.tab-btn{font-family:'DM Sans',sans-serif;background:var(--surf);border:1px solid var(--border);color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.65rem 1.4rem;border-radius:100px;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.5rem;}
+.tab-btn .ti{font-size:.95rem;}
+.tab-btn:hover{border-color:var(--borderH);color:var(--text);}
+.tab-btn.active{background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold);box-shadow:0 0 20px rgba(201,168,76,0.08);}
+
+/* PANELS */
+.panels{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 2rem 6rem;}
+.panel{display:none;animation:panelIn .35s ease both;}
+.panel.active{display:block;}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARD */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem;}
+.card-topbar{height:2px;background:var(--grad);}
+.card-body{padding:2rem;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;margin-bottom:.35rem;}
+.card-desc{font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:1.75rem;}
+
+/* FORM ELEMENTS */
+.label{font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.4rem;}
+.inp{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:all .25s;resize:vertical;}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
+.inp::placeholder{color:var(--dim);}
+textarea.inp{min-height:110px;}
+.field{margin-bottom:1.1rem;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+
+/* SELECT */
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B6560'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem;cursor:pointer;}
+select.inp option{background:#111;}
+
+/* BUTTON */
+.btn{font-family:'DM Sans',sans-serif;background:var(--grad);border:none;color:#000;font-size:.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:.85rem 2rem;border-radius:8px;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:.6rem;position:relative;overflow:hidden;}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);transform:translateX(-100%) skewX(-15deg);transition:transform .4s;}
+.btn:hover::after{transform:translateX(100%) skewX(-15deg);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.72rem;}
+.btn-ghost:hover{border-color:var(--borderH);color:var(--gold);}
+.btn-ghost::after{display:none;}
+
+/* SPINNER */
+.spin{width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* AI OUTPUT */
+.ai-out{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-top:1.5rem;display:none;animation:panelIn .3s ease;}
+.ai-out.show{display:block;}
+.ai-out-label{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.ai-out-label::before{content:'';width:20px;height:1px;background:var(--gold);}
+.ai-text{font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;}
+
+/* SCORE RING */
+.score-wrap{display:flex;align-items:center;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.score-ring-wrap{position:relative;width:100px;height:100px;flex-shrink:0;}
+.score-ring-wrap svg{transform:rotate(-90deg);}
+.score-ring-bg{fill:none;stroke:var(--dim);stroke-width:6;}
+.score-ring-fill{fill:none;stroke:url(#scoreGrad);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.34,1.56,.64,1);}
+.score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-big{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.score-label{font-size:.55rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.score-meta{flex:1;}
+.score-badge{display:inline-block;padding:.3rem .75rem;border-radius:100px;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.5rem;}
+.badge-adv{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
+.badge-int{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25);}
+.badge-beg{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.25);}
+.score-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;}
+
+/* SKILL BARS */
+.skill-bars{margin-top:.75rem;}
+.sb-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem;}
+.sb-name{font-size:.7rem;color:var(--muted);width:110px;flex-shrink:0;}
+.sb-track{flex:1;height:4px;background:var(--dim);border-radius:100px;overflow:hidden;}
+.sb-fill{height:100%;border-radius:100px;background:var(--grad);transition:width 1s ease;}
+.sb-val{font-size:.7rem;color:var(--gold);font-family:'Space Mono',monospace;width:35px;text-align:right;}
+
+/* GAP ITEMS */
+.gap-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1rem;}
+.gap-item{background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:1rem;}
+.gap-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;}
+.gap-skill{font-size:.75rem;font-weight:600;color:var(--text);}
+.gap-pct{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--gold);}
+.gap-bar-track{height:3px;background:var(--dim);border-radius:100px;overflow:hidden;}
+.gap-bar-fill{height:100%;border-radius:100px;transition:width 1s ease;}
+.gap-status{font-size:.62rem;color:var(--muted);margin-top:.4rem;}
+
+/* RESUME SECTIONS */
+.resume-preview{background:#0a0a0a;border:1px solid var(--border);border-radius:10px;padding:1.75rem;margin-top:1rem;font-family:'DM Sans',sans-serif;}
+.res-name{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--gold);}
+.res-role{font-size:.78rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+.res-section{margin-bottom:1.25rem;}
+.res-sh{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:.6rem;}
+.res-bullets{list-style:none;}
+.res-bullets li{font-size:.8rem;color:var(--muted);line-height:1.7;padding-left:1.1rem;position:relative;margin-bottom:.2rem;}
+.res-bullets li::before{content:'▸';position:absolute;left:0;color:var(--gold);font-size:.65rem;}
+.res-skill-tags{display:flex;flex-wrap:wrap;gap:.4rem;}
+.res-tag{background:rgba(201,168,76,.08);border:1px solid var(--border);color:var(--muted);font-size:.65rem;padding:.2rem .6rem;border-radius:4px;}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;gap:0;}
+.chat-history{background:var(--surf2);border:1px solid var(--border);border-radius:10px 10px 0 0;padding:1.5rem;min-height:280px;max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:1rem;}
+.chat-msg{display:flex;gap:.75rem;animation:panelIn .2s ease;}
+.chat-msg.user{flex-direction:row-reverse;}
+.chat-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;}
+.chat-avatar.ai{background:rgba(201,168,76,.12);border:1px solid var(--border);color:var(--gold);}
+.chat-avatar.user{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);}
+.chat-bubble{max-width:75%;padding:.75rem 1rem;border-radius:10px;font-size:.83rem;line-height:1.7;}
+.chat-bubble.ai{background:var(--surf3);border:1px solid var(--border);color:var(--text);border-radius:0 10px 10px 10px;}
+.chat-bubble.user{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--text);border-radius:10px 0 10px 10px;}
+.chat-input-row{display:flex;gap:.5rem;background:var(--surf3);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:.75rem;}
+.chat-input-row .inp{border-radius:6px;min-height:unset;padding:.65rem .9rem;}
+.typing-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:.6;animation:tdot 1.2s ease-in-out infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes tdot{0%,100%{transform:translateY(0);opacity:.4;}50%{transform:translateY(-4px);opacity:1;}}
+
+/* TOAST */
+#toasts{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;}
+.toast{background:var(--surf2);border:1px solid var(--border);color:var(--text);font-size:.8rem;padding:.75rem 1.25rem;border-radius:8px;animation:panelIn .3s ease;border-left:2px solid var(--gold);}
+.toast.out{animation:toastOut .3s ease forwards;}
+@keyframes toastOut{to{opacity:0;transform:translateX(20px);}}
+
+/* PATH STEPS */
+.path-steps{display:flex;flex-direction:column;gap:.75rem;margin-top:1rem;}
+.path-step{display:flex;gap:1rem;align-items:flex-start;padding:1rem;background:var(--surf3);border:1px solid var(--border);border-radius:8px;transition:border-color .2s;}
+.path-step:hover{border-color:var(--borderH);}
+.ps-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:rgba(201,168,76,.2);line-height:1;flex-shrink:0;width:2rem;}
+.ps-body{}
+.ps-title{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.2rem;}
+.ps-desc{font-size:.75rem;color:var(--muted);line-height:1.6;}
+.ps-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem;}
+.ps-tag{background:rgba(201,168,76,.06);border:1px solid var(--border);color:var(--muted);font-size:.6rem;padding:.15rem .5rem;border-radius:4px;}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:1.5rem 0;}
+
+/* RESUME BUILDER EXTRAS */
+.rg-section-label{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem;}
+.rg-section-label::before{content:'';width:16px;height:1px;background:var(--gold);}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+
+/* Resume style tabs */
+.res-style-tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.rst-btn{font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:.5rem 1rem;border-radius:6px;border:1px solid var(--border);background:var(--surf2);color:var(--muted);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.rst-btn:hover{border-color:var(--borderH);color:var(--text);}
+.rst-btn.active{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold);}
+.rst-badge{display:inline-block;font-size:.5rem;padding:.1rem .4rem;border-radius:3px;margin-left:.35rem;vertical-align:middle;}
+.badge-classic{background:rgba(255,255,255,.06);color:var(--muted);}
+.badge-modern{background:rgba(52,211,153,.1);color:#34d399;}
+.badge-creative{background:rgba(139,92,246,.15);color:#a78bfa;}
+.badge-ats{background:rgba(59,130,246,.12);color:#60a5fa;}
+
+/* Resume previews */
+.res-pv{display:none;animation:panelIn .25s ease;}
+.res-pv.active{display:block;}
+.res-actions{display:flex;gap:.5rem;margin-bottom:.85rem;align-items:center;}
+.res-actions span{font-size:.72rem;color:var(--muted);margin-right:auto;}
+
+/* CLASSIC RESUME */
+.rv-classic{background:#fafaf8;color:#1a1a1a;border-radius:8px;padding:2.5rem;font-family:'DM Sans',sans-serif;line-height:1.5;}
+.rv-classic .rv-name{font-size:1.9rem;font-weight:700;color:#111;letter-spacing:.5px;margin-bottom:.15rem;}
+.rv-classic .rv-role{font-size:.85rem;color:#555;margin-bottom:.5rem;font-weight:500;}
+.rv-classic .rv-contact{font-size:.75rem;color:#666;display:flex;flex-wrap:wrap;gap:.75rem;padding-bottom:.85rem;border-bottom:2px solid #111;margin-bottom:1rem;}
+.rv-classic .rv-sh{font-size:.7rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#111;border-bottom:1px solid #ddd;padding-bottom:.3rem;margin:1rem 0 .6rem;}
+.rv-classic .rv-summary{font-size:.82rem;color:#333;line-height:1.7;}
+.rv-classic ul{padding-left:1.1rem;}
+.rv-classic li{font-size:.8rem;color:#333;margin-bottom:.25rem;line-height:1.6;}
+.rv-classic .rv-tags{display:flex;flex-wrap:wrap;gap:.35rem;}
+.rv-classic .rv-tag{background:#f0f0f0;border:1px solid #e0e0e0;color:#444;font-size:.68rem;padding:.18rem .55rem;border-radius:3px;}
+.rv-classic .rv-entry{margin-bottom:.75rem;}
+.rv-classic .rv-etitle{font-size:.82rem;font-weight:700;color:#111;}
+.rv-classic .rv-emeta{font-size:.72rem;color:#888;margin-bottom:.2rem;}
+
+/* MODERN RESUME */
+.rv-modern{background:#0f0f0f;color:#f0ede8;border-radius:8px;overflow:hidden;font-family:'DM Sans',sans-serif;display:grid;grid-template-columns:220px 1fr;}
+.rv-modern .rv-sidebar{background:#0a0a0a;padding:1.75rem 1.25rem;border-right:1px solid rgba(201,168,76,.12);}
+.rv-modern .rv-main{padding:1.75rem;}
+.rv-modern .rv-name{font-size:1.5rem;font-weight:700;color:#C9A84C;line-height:1.1;margin-bottom:.25rem;}
+.rv-modern .rv-role{font-size:.72rem;color:#6B6560;text-transform:uppercase;letter-spacing:2px;margin-bottom:1.25rem;}
+.rv-modern .rv-sh{font-size:.58rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#C9A84C;margin:1.1rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.15);}
+.rv-modern .rv-contact-item{font-size:.72rem;color:#6B6560;margin-bottom:.35rem;word-break:break-all;}
+.rv-modern .rv-tag{display:block;font-size:.7rem;color:#999;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.rv-modern .rv-summary{font-size:.8rem;color:#aaa;line-height:1.75;margin-bottom:1rem;}
+.rv-modern ul{padding-left:1rem;}
+.rv-modern li{font-size:.78rem;color:#bbb;margin-bottom:.3rem;line-height:1.6;}
+.rv-modern .rv-etitle{font-size:.82rem;font-weight:600;color:#e0ddd8;}
+.rv-modern .rv-emeta{font-size:.7rem;color:#6B6560;margin-bottom:.3rem;}
+.rv-modern .rv-inline-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem;}
+.rv-modern .rv-itag{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);color:#C9A84C;font-size:.6rem;padding:.15rem .45rem;border-radius:3px;}
+
+/* CREATIVE RESUME */
+.rv-creative{background:linear-gradient(135deg,#0d0d1a 0%,#0a0f0a 100%);color:#f0ede8;border-radius:8px;padding:0;overflow:hidden;font-family:'DM Sans',sans-serif;}
+.rv-creative .rv-header{background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(201,168,76,.1));padding:2rem;border-bottom:1px solid rgba(139,92,246,.2);}
+.rv-creative .rv-name{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#a78bfa,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.rv-creative .rv-role{font-size:.78rem;color:#a78bfa;letter-spacing:3px;text-transform:uppercase;margin-top:.25rem;}
+.rv-creative .rv-contact{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.75rem;}
+.rv-creative .rv-ci{font-size:.72rem;color:#888;}
+.rv-creative .rv-body{padding:1.75rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.rv-creative .rv-col{}
+.rv-creative .rv-sh{font-size:.6rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#a78bfa;margin-bottom:.65rem;display:flex;align-items:center;gap:.5rem;}
+.rv-creative .rv-sh::after{content:'';flex:1;height:1px;background:rgba(139,92,246,.2);}
+.rv-creative .rv-summary{font-size:.8rem;color:#aaa;line-height:1.75;grid-column:1/-1;}
+.rv-creative ul{padding-left:0;list-style:none;}
+.rv-creative li{font-size:.78rem;color:#bbb;margin-bottom:.35rem;padding-left:.9rem;position:relative;}
+.rv-creative li::before{content:'▸';position:absolute;left:0;color:#a78bfa;font-size:.65rem;}
+.rv-creative .rv-skill-pill{display:inline-block;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:#c4b5fd;font-size:.65rem;padding:.2rem .6rem;border-radius:100px;margin:.15rem;}
+.rv-creative .rv-etitle{font-size:.82rem;font-weight:700;color:#e0ddd8;}
+.rv-creative .rv-emeta{font-size:.7rem;color:#6B6560;margin-bottom:.25rem;}
+
+/* ATS RESUME */
+.rv-ats{background:#fff;color:#111;border-radius:8px;padding:2.25rem;font-family:Arial,sans-serif;line-height:1.4;}
+.rv-ats .rv-name{font-size:1.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:.2rem;}
+.rv-ats .rv-contact{text-align:center;font-size:.75rem;color:#555;margin-bottom:.85rem;padding-bottom:.85rem;border-bottom:2px solid #111;}
+.rv-ats .rv-sh{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;background:#111;color:#fff;padding:.25rem .6rem;margin:1rem 0 .5rem;}
+.rv-ats .rv-summary{font-size:.8rem;color:#222;line-height:1.6;}
+.rv-ats ul{padding-left:1.25rem;}
+.rv-ats li{font-size:.78rem;color:#222;margin-bottom:.2rem;line-height:1.5;}
+.rv-ats .rv-tags{display:flex;flex-wrap:wrap;gap:.35rem;}
+.rv-ats .rv-tag{background:#f5f5f5;border:1px solid #ddd;color:#333;font-size:.68rem;padding:.18rem .55rem;border-radius:2px;}
+.rv-ats .rv-etitle{font-size:.82rem;font-weight:700;}
+.rv-ats .rv-emeta{font-size:.72rem;color:#666;margin-bottom:.2rem;}
+.rv-ats .rv-ats-note{background:#fffbea;border-left:3px solid #C9A84C;padding:.5rem .75rem;font-size:.72rem;color:#666;margin-top:1rem;border-radius:0 4px 4px 0;}
+
+@media(max-width:680px){.rv-modern{grid-template-columns:1fr;}.rv-creative .rv-body{grid-template-columns:1fr;}.row3{grid-template-columns:1fr;}}
+
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a class="nwm" href="index.html">SKILL<span>FORGE</span> AI</a>
+  <a class="nbk" href="index.html">← Back to Platform</a>
+</nav>
+
+<!-- HEADER -->
+<div class="suite-header">
+  <div class="suite-eyebrow">Intelligence Suite</div>
+  <h1 class="suite-title">YOUR AI<br><em>Co-Pilot</em></h1>
+  <p class="suite-sub">Four AI-powered tools to evaluate your work, plan your path, close skill gaps, and build a career-ready portfolio — all in one place.</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <button class="tab-btn active" onclick="switchTab('evaluator')"><span class="ti">⚡</span> Task Evaluator</button>
+  <button class="tab-btn" onclick="switchTab('coach')"><span class="ti">🧠</span> Career Coach</button>
+  <button class="tab-btn" onclick="switchTab('gap')"><span class="ti">📊</span> Skill Gap Analyzer</button>
+  <button class="tab-btn" onclick="switchTab('resume')"><span class="ti">📄</span> Resume Builder</button>
+</div>
+
+<!-- PANELS -->
+<div class="panels">
+
+  <!-- ═══ PANEL 1: TASK EVALUATOR ═══ -->
+  <div class="panel active" id="panel-evaluator">
+    <div class="card">
+      <div class="card-topbar"></div>
+      <div class="card-body">
+        <div class="card-title">AI Task Evaluator</div>
+        <div class="card-desc">Submit your task work below. Claude AI will score it 0–100 across multiple dimensions and give you detailed, actionable feedback.</div>
+
+        <div class="field">
+          <label class="label">Role / Track</label>
+          <select class="inp" id="ev-role">
+            <option value="">Select your internship role…</option>
+            <option>Frontend Developer</option>
+            <option>UI/UX Designer</option>
+            <option>Data Analyst</option>
+            <option>Product Manager</option>
+            <option>Marketing Strategist</option>
+            <option>Backend Developer</option>
+            <option>Graphic Designer</option>
+            <option>Content Writer</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="label">Task Name</label>
+          <input class="inp" id="ev-task" placeholder="e.g. Build a responsive landing page…" />
+        </div>
+
+        <div class="field">
+          <label class="label">Your Work / Submission</label>
+          <textarea class="inp" id="ev-work" placeholder="Paste your work, description, code snippets, design rationale, analysis output — anything relevant to your submission…"></textarea>
+        </div>
+
+        <button class="btn" id="ev-btn" onclick="runEvaluator()">
+          <span class="spin" id="ev-spin"></span>
+          <span id="ev-label">Evaluate My Work ⚡</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="ai-out" id="ev-out">
+      <div class="card-topbar"></div>
+      <div style="padding:1.75rem;">
+        <!-- Score ring -->
+        <div class="score-wrap" id="ev-score-wrap">
+          <div class="score-ring-wrap">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#C9A84C"/>
+                  <stop offset="50%" stop-color="#E8C96A"/>
+                  <stop offset="100%" stop-color="#F5E0A0"/>
+                </linearGradient>
+              </defs>
+              <circle class="score-ring-bg" cx="50" cy="50" r="44"/>
+              <circle class="score-ring-fill" id="ev-ring" cx="50" cy="50" r="44"
+                stroke-dasharray="276.46" stroke-dashoffset="276.46"/>
+            </svg>
+            <div class="score-num">
+              <div class="score-big" id="ev-score-num">—</div>
+              <div class="score-label">Score</div>
+            </div>
+          </div>
+          <div class="score-meta">
+            <div class="score-badge badge-int" id="ev-badge">Evaluating…</div>
+            <div class="score-title" id="ev-score-title">AI Evaluation</div>
+            <div class="skill-bars" id="ev-bars"></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="ai-out-label">Detailed Feedback</div>
+        <div class="ai-text" id="ev-feedback"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PANEL 2: CAREER COACH ═══ -->
+  <div class="panel" id="panel-coach">
+    <div class="card">
+      <div class="card-topbar"></div>
+      <div class="card-body">
+        <div class="card-title">AI Career Coach</div>
+        <div class="card-desc">Your personal AI mentor. Ask anything about career strategy, skill development, interview prep, or your SkillForge progress.</div>
+
+        <div class="row2" style="margin-bottom:1.25rem;">
+          <div class="field">
+            <label class="label">Your Role</label>
+            <select class="inp" id="cc-role">
+              <option value="">Select role…</option>
+              <option>Frontend Developer</option>
+              <option>UI/UX Designer</option>
+              <option>Data Analyst</option>
+              <option>Product Manager</option>
+              <option>Marketing Strategist</option>
+              <option>Backend Developer</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label">Experience Level</label>
+            <select class="inp" id="cc-level">
+              <option>Student / Fresher</option>
+              <option>0–1 Years</option>
+              <option>1–3 Years</option>
+              <option>3+ Years</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chat-wrap">
+          <div class="chat-history" id="cc-history">
+            <div class="chat-msg">
+              <div class="chat-avatar ai">✦</div>
+              <div class="chat-bubble ai">Hi! I'm your SkillForge AI Career Coach. I'm here to help you grow, strategize, and land the role you deserve. Set your role and level above, then ask me anything — career roadmaps, skill gaps, interview tips, salary negotiation, or what to work on next. What's on your mind?</div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input class="inp" id="cc-input" placeholder="Ask your career coach…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCoach();}"/>
+            <button class="btn" onclick="sendCoach()" id="cc-btn" style="padding:.65rem 1.25rem;white-space:nowrap;">
+              <span class="spin" id="cc-spin"></span>
+              <span id="cc-label">Send</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem;">
+          <button class="copy-btn" onclick="quickAsk('What skills should I focus on to get hired faster?')">Quick: Skills to focus on</button>
+          <button class="copy-btn" onclick="quickAsk('Give me a 30-day roadmap to improve my profile.')">30-day roadmap</button>
+          <button class="copy-btn" onclick="quickAsk('How do I prepare for a technical interview?')">Interview prep</button>
+          <button class="copy-btn" onclick="quickAsk('What salary should I expect as a fresher?')">Salary guidance</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PANEL 3: SKILL GAP ANALYZER ═══ -->
+  <div class="panel" id="panel-gap">
+    <div class="card">
+      <div class="card-topbar"></div>
+      <div class="card-body">
+        <div class="card-title">Skill Gap Analyzer</div>
+        <div class="card-desc">Enter your target job role and your current skills. Claude will map the gap and generate a personalized action plan.</div>
+
+        <div class="row2">
+          <div class="field">
+            <label class="label">Dream Job Title</label>
+            <input class="inp" id="sg-target" placeholder="e.g. Senior UX Designer at Google…" />
+          </div>
+          <div class="field">
+            <label class="label">Current Role / Background</label>
+            <input class="inp" id="sg-current" placeholder="e.g. CS Student, 2nd year…" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Your Current Skills (comma-separated)</label>
+          <input class="inp" id="sg-skills" placeholder="e.g. Figma, HTML, CSS, basic user research…" />
+        </div>
+
+        <div class="field">
+          <label class="label">Anything else to consider?</label>
+          <textarea class="inp" id="sg-notes" placeholder="Certifications, projects done, time available, etc…" style="min-height:70px;"></textarea>
+        </div>
+
+        <button class="btn" id="sg-btn" onclick="runGapAnalyzer()">
+          <span class="spin" id="sg-spin"></span>
+          <span id="sg-label">Analyze My Skill Gap 📊</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ai-out" id="sg-out">
+      <div class="card-topbar"></div>
+      <div style="padding:1.75rem;">
+        <div class="ai-out-label">Gap Analysis</div>
+        <div id="sg-gap-grid" class="gap-grid"></div>
+        <div class="divider"></div>
+        <div class="ai-out-label">Your Action Plan</div>
+        <div class="path-steps" id="sg-steps"></div>
+        <div class="divider"></div>
+        <div class="ai-out-label">Full Analysis</div>
+        <div class="ai-text" id="sg-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PANEL 4: RESUME BUILDER ═══ -->
+  <div class="panel" id="panel-resume">
+    <div class="card">
+      <div class="card-topbar"></div>
+      <div class="card-body">
+        <div class="card-title">AI Resume Builder</div>
+        <div class="card-desc">Fill in your details once — Claude generates 4 tailored resumes in different styles: Classic, Modern, Creative, and ATS-Optimised. Pick the one that fits.</div>
+
+        <!-- PERSONAL INFO -->
+        <div class="rg-section-label">Personal Information</div>
+        <div class="row3">
+          <div class="field">
+            <label class="label">Full Name *</label>
+            <input class="inp" id="rg-name" placeholder="e.g. Priya Sharma" />
+          </div>
+          <div class="field">
+            <label class="label">Email *</label>
+            <input class="inp" id="rg-email" placeholder="priya@email.com" />
+          </div>
+          <div class="field">
+            <label class="label">Phone</label>
+            <input class="inp" id="rg-phone" placeholder="+91 98765 43210" />
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label class="label">LinkedIn / Portfolio URL</label>
+            <input class="inp" id="rg-links" placeholder="linkedin.com/in/priya or portfolio.dev" />
+          </div>
+          <div class="field">
+            <label class="label">Location</label>
+            <input class="inp" id="rg-location" placeholder="e.g. Hyderabad, India" />
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- TARGET -->
+        <div class="rg-section-label">Target & Summary</div>
+        <div class="row2">
+          <div class="field">
+            <label class="label">Target Job Role *</label>
+            <input class="inp" id="rg-role" placeholder="e.g. Frontend Developer" />
+          </div>
+          <div class="field">
+            <label class="label">Years of Experience</label>
+            <select class="inp" id="rg-exp-level">
+              <option>Student / Fresher</option>
+              <option>0–1 Years</option>
+              <option>1–3 Years</option>
+              <option>3–5 Years</option>
+              <option>5+ Years</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Brief About Yourself</label>
+          <textarea class="inp" id="rg-about" placeholder="Tell Claude a bit about yourself — your goals, strengths, what makes you unique…" style="min-height:80px;"></textarea>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- EDUCATION -->
+        <div class="rg-section-label">Education</div>
+        <div class="row2">
+          <div class="field">
+            <label class="label">Degree & Major *</label>
+            <input class="inp" id="rg-edu-degree" placeholder="e.g. B.Tech Computer Science" />
+          </div>
+          <div class="field">
+            <label class="label">University & Year</label>
+            <input class="inp" id="rg-edu-uni" placeholder="e.g. JNTU Hyderabad, 2025" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">GPA / Percentage & Relevant Coursework</label>
+          <input class="inp" id="rg-edu-gpa" placeholder="e.g. 8.4 CGPA | Coursework: DSA, DBMS, Web Dev, ML…" />
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SKILLS -->
+        <div class="rg-section-label">Skills</div>
+        <div class="row2">
+          <div class="field">
+            <label class="label">Technical Skills *</label>
+            <input class="inp" id="rg-skills-tech" placeholder="e.g. React, Python, Figma, SQL, Node.js…" />
+          </div>
+          <div class="field">
+            <label class="label">Soft Skills</label>
+            <input class="inp" id="rg-skills-soft" placeholder="e.g. Leadership, Problem Solving, Communication…" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Tools & Platforms</label>
+          <input class="inp" id="rg-tools" placeholder="e.g. Git, VS Code, Jira, Postman, AWS, Notion…" />
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- EXPERIENCE / PROJECTS -->
+        <div class="rg-section-label">Experience & Projects</div>
+        <div class="field">
+          <label class="label">Work Experience (internships, jobs)</label>
+          <textarea class="inp" id="rg-work" placeholder="e.g. Frontend Intern at XYZ Startup (Jan–Mar 2024) — built React dashboard, integrated REST APIs, reduced load time by 40%…" style="min-height:90px;"></textarea>
+        </div>
+        <div class="field">
+          <label class="label">Projects *</label>
+          <textarea class="inp" id="rg-projects" placeholder="e.g. E-commerce app using React + Firebase (500+ users). Data analysis dashboard in Python/Tableau. AI chatbot using OpenAI API…" style="min-height:90px;"></textarea>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- EXTRAS -->
+        <div class="rg-section-label">Extra Credentials</div>
+        <div class="row2">
+          <div class="field">
+            <label class="label">Certifications</label>
+            <input class="inp" id="rg-certs" placeholder="e.g. Google UX Design Cert, AWS Cloud Practitioner…" />
+          </div>
+          <div class="field">
+            <label class="label">Achievements & Awards</label>
+            <input class="inp" id="rg-awards" placeholder="e.g. Hackathon Winner, Dean's List, Published Paper…" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Languages / Volunteer / Hobbies (optional)</label>
+          <input class="inp" id="rg-extras" placeholder="e.g. Telugu, Hindi, English | Volunteered at NGO | Open source contributor…" />
+        </div>
+
+        <button class="btn" id="rg-btn" onclick="runResumeGen()" style="margin-top:.5rem;">
+          <span class="spin" id="rg-spin"></span>
+          <span id="rg-label">✨ Generate 4 Resumes</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="ai-out" id="rg-out">
+      <div class="card-topbar"></div>
+      <div style="padding:1.75rem;">
+        <div class="ai-out-label">Your 4 AI-Generated Resumes</div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:1.25rem;">Each resume is tailored to a different audience and use case. Click a style to preview it.</p>
+
+        <!-- Style switcher tabs -->
+        <div class="res-style-tabs" id="res-style-tabs"></div>
+
+        <!-- Resume preview area -->
+        <div id="rg-preview-wrap"></div>
+
+        <!-- ATS Tips -->
+        <div class="divider"></div>
+        <div class="ai-out-label">ATS Tips & Recommendations</div>
+        <div class="ai-text" id="rg-tips"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panels -->
+
+<div id="toasts"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════ */
+function switchTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   CLAUDE API CALL
+═══════════════════════════════════════════ */
+async function callClaude(systemPrompt, userMessage){
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system: systemPrompt,
+      messages:[{role:'user', content: userMessage}]
+    })
+  });
+  if(!res.ok) throw new Error('API error '+res.status);
+  const data = await res.json();
+  return data.content.map(b=>b.text||'').join('');
+}
+
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+function setBusy(btnId, spinId, labelId, label, busy){
+  const btn=document.getElementById(btnId);
+  const spin=document.getElementById(spinId);
+  const lbl=document.getElementById(labelId);
+  btn.disabled=busy;
+  spin.style.display=busy?'block':'none';
+  lbl.textContent=busy?'Thinking…':label;
+}
+
+function toast(msg){
+  const el=document.createElement('div');
+  el.className='toast';el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},3000);
+}
+
+function parseJSON(str){
+  const clean=str.replace(/```json|```/g,'').trim();
+  return JSON.parse(clean);
+}
+
+/* ═══════════════════════════════════════════
+   1. TASK EVALUATOR
+═══════════════════════════════════════════ */
+async function runEvaluator(){
+  const role=document.getElementById('ev-role').value;
+  const task=document.getElementById('ev-task').value.trim();
+  const work=document.getElementById('ev-work').value.trim();
+  if(!role||!task||!work){toast('Please fill in all fields.');return;}
+
+  setBusy('ev-btn','ev-spin','ev-label','Evaluate My Work ⚡',true);
+
+  const sys=`You are an expert internship task evaluator for SkillForge AI. Evaluate intern submissions rigorously but fairly. Always respond ONLY with valid JSON, no markdown, no preamble.`;
+  const usr=`Role: ${role}
+Task: ${task}
+Submission:
+${work}
+
+Respond ONLY with this JSON:
+{
+  "score": <0-100 integer>,
+  "badge": "<Beginner|Intermediate|Advanced>",
+  "dimensions": [
+    {"name":"Quality","score":<0-100>},
+    {"name":"Completeness","score":<0-100>},
+    {"name":"Creativity","score":<0-100>},
+    {"name":"Relevance","score":<0-100>}
+  ],
+  "headline": "<short 6-8 word evaluation title>",
+  "feedback": "<detailed 4-6 sentence feedback with specific actionable improvements>"
+}`;
+
+  try{
+    const raw=await callClaude(sys,usr);
+    const data=parseJSON(raw);
+    renderEvaluator(data);
+    document.getElementById('ev-out').classList.add('show');
+    document.getElementById('ev-out').scrollIntoView({behavior:'smooth',block:'nearest'});
+    toast('Evaluation complete ⚡');
+  } catch(e){
+    toast('Something went wrong. Try again.');
+    console.error(e);
+  }
+  setBusy('ev-btn','ev-spin','ev-label','Evaluate My Work ⚡',false);
+}
+
+function renderEvaluator(d){
+  // Score ring
+  const circ=276.46;
+  const offset=circ-(circ*d.score/100);
+  document.getElementById('ev-ring').style.strokeDashoffset=offset;
+  document.getElementById('ev-score-num').textContent=d.score;
+  const badgeEl=document.getElementById('ev-badge');
+  badgeEl.textContent=d.badge;
+  badgeEl.className='score-badge '+(d.badge==='Advanced'?'badge-adv':d.badge==='Intermediate'?'badge-int':'badge-beg');
+  document.getElementById('ev-score-title').textContent=d.headline;
+  // Bars
+  document.getElementById('ev-bars').innerHTML=d.dimensions.map(dim=>`
+    <div class="sb-row">
+      <div class="sb-name">${dim.name}</div>
+      <div class="sb-track"><div class="sb-fill" style="width:0%" data-w="${dim.score}%"></div></div>
+      <div class="sb-val">${dim.score}</div>
+    </div>`).join('');
+  setTimeout(()=>{document.querySelectorAll('.sb-fill').forEach(el=>{el.style.width=el.dataset.w;});},60);
+  document.getElementById('ev-feedback').textContent=d.feedback;
+}
+
+/* ═══════════════════════════════════════════
+   2. CAREER COACH (CHAT)
+═══════════════════════════════════════════ */
+const coachHistory=[];
+
+function appendMsg(role, text, typing=false){
+  const hist=document.getElementById('cc-history');
+  const div=document.createElement('div');
+  div.className='chat-msg '+(role==='user'?'user':'');
+  const isAI=role!=='user';
+  div.innerHTML=`
+    <div class="chat-avatar ${isAI?'ai':'user'}">${isAI?'✦':'you'}</div>
+    <div class="chat-bubble ${isAI?'ai':'user'}" id="${typing?'typing-bubble':''}">${
+      typing?'<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>':
+      text.replace(/\n/g,'<br>')
+    }</div>`;
+  hist.appendChild(div);
+  hist.scrollTop=hist.scrollHeight;
+  return div;
+}
+
+async function sendCoach(){
+  const input=document.getElementById('cc-input');
+  const msg=input.value.trim();
+  if(!msg) return;
+  input.value='';
+
+  const role=document.getElementById('cc-role').value||'intern';
+  const level=document.getElementById('cc-level').value;
+
+  appendMsg('user',msg);
+  coachHistory.push({role:'user',content:msg});
+
+  const typingEl=appendMsg('ai','',true);
+  document.getElementById('cc-btn').disabled=true;
+  document.getElementById('cc-spin').style.display='block';
+  document.getElementById('cc-label').textContent='';
+
+  const sys=`You are an empathetic, expert AI Career Coach for SkillForge AI — a platform that helps interns build verified skills. The user is a ${level} ${role}. Be warm, specific, and actionable. Keep responses concise (3-5 sentences max per point). Use line breaks for readability. Never use markdown headers. Use ✦ sparingly for key tips.`;
+
+  try{
+    const messages=coachHistory.slice(-10);
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:sys,
+        messages
+      })
+    });
+    const data=await res.json();
+    const reply=data.content.map(b=>b.text||'').join('');
+    typingEl.remove();
+    appendMsg('ai',reply);
+    coachHistory.push({role:'assistant',content:reply});
+  } catch(e){
+    typingEl.remove();
+    appendMsg('ai','Sorry, I ran into an issue. Please try again.');
+  }
+
+  document.getElementById('cc-btn').disabled=false;
+  document.getElementById('cc-spin').style.display='none';
+  document.getElementById('cc-label').textContent='Send';
+}
+
+function quickAsk(q){
+  document.getElementById('cc-input').value=q;
+  sendCoach();
+}
+
+/* ═══════════════════════════════════════════
+   3. SKILL GAP ANALYZER
+═══════════════════════════════════════════ */
+async function runGapAnalyzer(){
+  const target=document.getElementById('sg-target').value.trim();
+  const current=document.getElementById('sg-current').value.trim();
+  const skills=document.getElementById('sg-skills').value.trim();
+  const notes=document.getElementById('sg-notes').value.trim();
+  if(!target||!skills){toast('Fill in your dream role and current skills.');return;}
+
+  setBusy('sg-btn','sg-spin','sg-label','Analyze My Skill Gap 📊',true);
+
+  const sys=`You are an expert career strategist for SkillForge AI. Analyze skill gaps and create actionable learning plans. Always respond ONLY with valid JSON, no markdown, no preamble.`;
+  const usr=`Dream Job: ${target}
+Current Background: ${current||'Not specified'}
+Current Skills: ${skills}
+Notes: ${notes||'None'}
+
+Respond ONLY with this JSON:
+{
+  "gaps": [
+    {"skill":"<skill name>","current":<0-100 current proficiency>,"required":<60-100 required level>,"status":"<Missing|Weak|Partial|Good>"},
+    {"skill":"<skill name>","current":<0-100>,"required":<60-100>,"status":"<Missing|Weak|Partial|Good>"},
+    {"skill":"<skill name>","current":<0-100>,"required":<60-100>,"status":"<Missing|Weak|Partial|Good>"},
+    {"skill":"<skill name>","current":<0-100>,"required":<60-100>,"status":"<Missing|Weak|Partial|Good>"}
+  ],
+  "steps": [
+    {"title":"<action step title>","desc":"<2 sentence description>","tags":["<tag1>","<tag2>"]},
+    {"title":"<action step title>","desc":"<2 sentence description>","tags":["<tag1>","<tag2>"]},
+    {"title":"<action step title>","desc":"<2 sentence description>","tags":["<tag1>","<tag2>"]},
+    {"title":"<action step title>","desc":"<2 sentence description>","tags":["<tag1>","<tag2>"]}
+  ],
+  "summary": "<3-4 sentence overall gap summary with encouragement and key priorities>"
+}`;
+
+  try{
+    const raw=await callClaude(sys,usr);
+    const data=parseJSON(raw);
+    renderGapAnalyzer(data);
+    document.getElementById('sg-out').classList.add('show');
+    document.getElementById('sg-out').scrollIntoView({behavior:'smooth',block:'nearest'});
+    toast('Gap analysis ready 📊');
+  } catch(e){
+    toast('Something went wrong. Try again.');
+    console.error(e);
+  }
+  setBusy('sg-btn','sg-spin','sg-label','Analyze My Skill Gap 📊',false);
+}
+
+function gapColor(status){
+  return {Missing:'#ef4444',Weak:'#f59e0b',Partial:'#3b82f6',Good:'#34d399'}[status]||'#C9A84C';
+}
+
+function renderGapAnalyzer(d){
+  document.getElementById('sg-gap-grid').innerHTML=d.gaps.map(g=>`
+    <div class="gap-item">
+      <div class="gap-item-head">
+        <div class="gap-skill">${g.skill}</div>
+        <div class="gap-pct" style="color:${gapColor(g.status)}">${g.status}</div>
+      </div>
+      <div class="gap-bar-track">
+        <div class="gap-bar-fill" style="width:${g.current}%;background:${gapColor(g.status)};" data-w="${g.current}%"></div>
+      </div>
+      <div class="gap-status">You: ${g.current}% → Need: ${g.required}%</div>
+    </div>`).join('');
+  setTimeout(()=>{document.querySelectorAll('.gap-bar-fill').forEach(el=>{el.style.width=el.dataset.w;});},60);
+
+  document.getElementById('sg-steps').innerHTML=d.steps.map((s,i)=>`
+    <div class="path-step">
+      <div class="ps-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="ps-body">
+        <div class="ps-title">${s.title}</div>
+        <div class="ps-desc">${s.desc}</div>
+        <div class="ps-tags">${s.tags.map(t=>`<span class="ps-tag">${t}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('sg-text').textContent=d.summary;
+}
+
+/* ═══════════════════════════════════════════
+   4. RESUME BUILDER — 4 STYLES
+═══════════════════════════════════════════ */
+let generatedResumes = null;
+
+function g(id){ return (document.getElementById(id)||{}).value?.trim()||''; }
+
+async function runResumeGen(){
+  const name=g('rg-name'), role=g('rg-role'), techSkills=g('rg-skills-tech');
+  if(!name||!role||!techSkills){ toast('Please fill in Name, Target Role, and Technical Skills.'); return; }
+
+  setBusy('rg-btn','rg-spin','rg-label','✨ Generate 4 Resumes', true);
+  document.getElementById('rg-out').classList.remove('show');
+
+  const info={
+    name, role,
+    email: g('rg-email'), phone: g('rg-phone'), links: g('rg-links'), location: g('rg-location'),
+    expLevel: g('rg-exp-level'), about: g('rg-about'),
+    edu: `${g('rg-edu-degree')} | ${g('rg-edu-uni')} | ${g('rg-edu-gpa')}`,
+    techSkills, softSkills: g('rg-skills-soft'), tools: g('rg-tools'),
+    work: g('rg-work'), projects: g('rg-projects'),
+    certs: g('rg-certs'), awards: g('rg-awards'), extras: g('rg-extras')
+  };
+
+  const sys=`You are an elite professional resume writer at SkillForge AI. Create 4 distinct resume versions from the same candidate data. Each must feel genuinely different — tone, emphasis, structure. Always respond ONLY with valid JSON. No markdown, no preamble.`;
+
+  const usr=`Candidate Info:
+Name: ${info.name}
+Email: ${info.email} | Phone: ${info.phone} | Location: ${info.location}
+Links: ${info.links}
+Target Role: ${info.role} | Experience Level: ${info.expLevel}
+About: ${info.about}
+Education: ${info.edu}
+Technical Skills: ${info.techSkills}
+Soft Skills: ${info.softSkills}
+Tools: ${info.tools}
+Work Experience: ${info.work||'None provided'}
+Projects: ${info.projects}
+Certifications: ${info.certs}
+Awards: ${info.awards}
+Extras: ${info.extras}
+
+Generate 4 resume versions. Each must have different tone and focus:
+1. classic — Traditional, formal, conservative. Great for big companies, banks, govt. Professional and safe.
+2. modern — Sleek and technical. Great for startups and tech companies. Lead with impact numbers and tech stack.
+3. creative — Bold and expressive. Great for design/marketing/product roles. Personality-forward, storytelling tone.
+4. ats — Plain-text optimised for ATS robots. Keyword-heavy, no fancy formatting, maximum scannability.
+
+Respond ONLY with this JSON (all strings, no nulls):
+{
+  "classic": {
+    "summary": "<confident 3-sentence professional summary, formal tone>",
+    "experience": [{"title":"<role>","company":"<company or project>","period":"<period>","bullets":["<bullet>","<bullet>","<bullet>"]}],
+    "skills": ["<skill>","<skill>","<skill>","<skill>","<skill>","<skill>","<skill>","<skill>"],
+    "education": "<degree, university, year, gpa>",
+    "certifications": "<certs and awards>"
+  },
+  "modern": {
+    "summary": "<punchy 2-sentence summary, lead with biggest impact, tech-forward>",
+    "experience": [{"title":"<role>","company":"<company or project>","period":"<period>","bullets":["<metric-driven bullet>","<metric-driven bullet>","<metric-driven bullet>"]}],
+    "skills": ["<skill>","<skill>","<skill>","<skill>","<skill>","<skill>"],
+    "tools": ["<tool>","<tool>","<tool>","<tool>"],
+    "education": "<degree, university, year>",
+    "certifications": "<certs>"
+  },
+  "creative": {
+    "tagline": "<bold 1-line personal tagline>",
+    "summary": "<storytelling 3-sentence summary, show personality, what drives them>",
+    "experience": [{"title":"<role>","company":"<company or project>","period":"<period>","bullets":["<story-driven bullet>","<story-driven bullet>"]}],
+    "skills": ["<skill>","<skill>","<skill>","<skill>","<skill>","<skill>"],
+    "education": "<degree, university, year>",
+    "certifications": "<certs and awards>"
+  },
+  "ats": {
+    "summary": "<keyword-rich 3-sentence summary matching job role exactly, ATS-optimised>",
+    "experience": [{"title":"<role>","company":"<company or project>","period":"<period>","bullets":["<keyword-dense ATS bullet>","<keyword-dense ATS bullet>","<keyword-dense ATS bullet>"]}],
+    "skills": ["<skill>","<skill>","<skill>","<skill>","<skill>","<skill>","<skill>","<skill>","<skill>","<skill>"],
+    "education": "<degree, university, year, gpa>",
+    "certifications": "<all certs and awards listed>",
+    "ats_note": "<why this resume is optimised for ATS and what keywords it targets>"
+  },
+  "ats_tips": "<4-5 sentences of universal tips for all 4 resumes: what to add, what to remove, how to tailor further>"
+}`;
+
+  try{
+    const raw = await callClaude(sys, usr);
+    const data = parseJSON(raw);
+    generatedResumes = data;
+    renderAllResumes(info, data);
+    document.getElementById('rg-out').classList.add('show');
+    document.getElementById('rg-out').scrollIntoView({behavior:'smooth',block:'nearest'});
+    toast('4 resumes generated! ✨');
+  } catch(e){
+    toast('Something went wrong. Try again.');
+    console.error(e);
+  }
+  setBusy('rg-btn','rg-spin','rg-label','✨ Generate 4 Resumes', false);
+}
+
+const STYLES=[
+  {id:'classic', label:'Classic', badge:'badge-classic', note:'Corporate & Safe'},
+  {id:'modern',  label:'Modern',  badge:'badge-modern',  note:'Startup & Tech'},
+  {id:'creative',label:'Creative',badge:'badge-creative', note:'Bold & Personal'},
+  {id:'ats',     label:'ATS-First',badge:'badge-ats',    note:'Recruiter Bots'},
+];
+
+function renderAllResumes(info, data){
+  // Style tabs
+  document.getElementById('res-style-tabs').innerHTML = STYLES.map((s,i)=>`
+    <button class="rst-btn ${i===0?'active':''}" onclick="switchResume('${s.id}',this)">
+      ${s.label} <span class="rst-badge ${s.badge}">${s.note}</span>
+    </button>`).join('');
+
+  // All 4 resume previews
+  document.getElementById('rg-preview-wrap').innerHTML = STYLES.map((s,i)=>`
+    <div class="res-pv ${i===0?'active':''}" id="rpv-${s.id}">
+      <div class="res-actions">
+        <span>${s.label} Resume — ${s.note}</span>
+        <button class="copy-btn" onclick="copyResume('rpv-${s.id}')">Copy Text</button>
+      </div>
+      <div id="rv-${s.id}"></div>
+    </div>`).join('');
+
+  // Render each style
+  renderClassic(info, data.classic);
+  renderModern(info, data.modern);
+  renderCreative(info, data.creative);
+  renderATS(info, data.ats);
+
+  document.getElementById('rg-tips').textContent = data.ats_tips;
+}
+
+function switchResume(id, btn){
+  document.querySelectorAll('.res-pv').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.rst-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('rpv-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function expSection(entries, cls){
+  if(!entries||!entries.length) return '';
+  return entries.map(e=>`
+    <div class="rv-entry">
+      <div class="rv-etitle">${e.title}${e.company?' — '+e.company:''}</div>
+      <div class="rv-emeta">${e.period||''}</div>
+      <ul>${(e.bullets||[]).map(b=>`<li>${b}</li>`).join('')}</ul>
+    </div>`).join('');
+}
+
+function renderClassic(info, d){
+  document.getElementById('rv-classic').innerHTML=`
+  <div class="rv-classic">
+    <div class="rv-name">${info.name}</div>
+    <div class="rv-role">${info.role}</div>
+    <div class="rv-contact">
+      ${info.email?`<span>✉ ${info.email}</span>`:''}
+      ${info.phone?`<span>☎ ${info.phone}</span>`:''}
+      ${info.location?`<span>📍 ${info.location}</span>`:''}
+      ${info.links?`<span>🔗 ${info.links}</span>`:''}
+    </div>
+    <div class="rv-sh">Professional Summary</div>
+    <div class="rv-summary">${d.summary}</div>
+    ${d.experience?.length?`<div class="rv-sh">Experience & Projects</div>${expSection(d.experience,'rv-classic')}`:''}
+    <div class="rv-sh">Skills</div>
+    <div class="rv-tags">${(d.skills||[]).map(s=>`<span class="rv-tag">${s}</span>`).join('')}</div>
+    ${d.education?`<div class="rv-sh">Education</div><div class="rv-summary">${d.education}</div>`:''}
+    ${d.certifications?`<div class="rv-sh">Certifications & Awards</div><div class="rv-summary">${d.certifications}</div>`:''}
+  </div>`;
+}
+
+function renderModern(info, d){
+  document.getElementById('rv-modern').innerHTML=`
+  <div class="rv-modern">
+    <div class="rv-sidebar">
+      <div class="rv-name">${info.name}</div>
+      <div class="rv-role">${info.role}</div>
+      <div class="rv-sh">Contact</div>
+      ${info.email?`<div class="rv-contact-item">${info.email}</div>`:''}
+      ${info.phone?`<div class="rv-contact-item">${info.phone}</div>`:''}
+      ${info.location?`<div class="rv-contact-item">${info.location}</div>`:''}
+      ${info.links?`<div class="rv-contact-item">${info.links}</div>`:''}
+      <div class="rv-sh">Skills</div>
+      ${(d.skills||[]).map(s=>`<span class="rv-tag">${s}</span>`).join('')}
+      ${d.tools?.length?`<div class="rv-sh">Tools</div>${d.tools.map(t=>`<span class="rv-tag">${t}</span>`).join('')}`:''}
+      ${d.education?`<div class="rv-sh">Education</div><div class="rv-contact-item" style="color:#bbb;font-size:.72rem;">${d.education}</div>`:''}
+    </div>
+    <div class="rv-main">
+      <div class="rv-sh">Profile</div>
+      <div class="rv-summary">${d.summary}</div>
+      ${d.experience?.length?`<div class="rv-sh">Experience & Projects</div>${d.experience.map(e=>`
+        <div style="margin-bottom:1rem;">
+          <div class="rv-etitle">${e.title}${e.company?' — '+e.company:''}</div>
+          <div class="rv-emeta">${e.period||''}</div>
+          <ul>${(e.bullets||[]).map(b=>`<li>${b}</li>`).join('')}</ul>
+          <div class="rv-inline-tags">${(d.skills||[]).slice(0,3).map(s=>`<span class="rv-itag">${s}</span>`).join('')}</div>
+        </div>`).join('')}`:''}
+      ${d.certifications?`<div class="rv-sh">Certifications</div><div class="rv-summary">${d.certifications}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderCreative(info, d){
+  document.getElementById('rv-creative').innerHTML=`
+  <div class="rv-creative">
+    <div class="rv-header">
+      ${d.tagline?`<div style="font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:#a78bfa;margin-bottom:.5rem;">${d.tagline}</div>`:''}
+      <div class="rv-name">${info.name}</div>
+      <div class="rv-role">${info.role}</div>
+      <div class="rv-contact">
+        ${info.email?`<span class="rv-ci">${info.email}</span>`:''}
+        ${info.phone?`<span class="rv-ci">${info.phone}</span>`:''}
+        ${info.location?`<span class="rv-ci">${info.location}</span>`:''}
+        ${info.links?`<span class="rv-ci">${info.links}</span>`:''}
+      </div>
+    </div>
+    <div class="rv-body">
+      <div class="rv-col" style="grid-column:1/-1;">
+        <div class="rv-sh">My Story</div>
+        <div style="font-size:.8rem;color:#aaa;line-height:1.75;">${d.summary}</div>
+      </div>
+      ${d.experience?.length?`<div class="rv-col" style="grid-column:1/-1;"><div class="rv-sh">What I've Built</div>${d.experience.map(e=>`
+        <div style="margin-bottom:1rem;">
+          <div class="rv-etitle">${e.title}${e.company?' — '+e.company:''}</div>
+          <div class="rv-emeta">${e.period||''}</div>
+          <ul>${(e.bullets||[]).map(b=>`<li>${b}</li>`).join('')}</ul>
+        </div>`).join('')}</div>`:''}
+      <div class="rv-col">
+        <div class="rv-sh">Skills</div>
+        <div>${(d.skills||[]).map(s=>`<span class="rv-skill-pill">${s}</span>`).join('')}</div>
+      </div>
+      <div class="rv-col">
+        <div class="rv-sh">Education & Creds</div>
+        ${d.education?`<div class="rv-etitle" style="font-size:.78rem;">${d.education}</div>`:''}
+        ${d.certifications?`<div class="rv-emeta" style="margin-top:.5rem;">${d.certifications}</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderATS(info, d){
+  document.getElementById('rv-ats').innerHTML=`
+  <div class="rv-ats">
+    <div class="rv-name">${info.name.toUpperCase()}</div>
+    <div class="rv-contact">${[info.email,info.phone,info.location,info.links].filter(Boolean).join(' | ')}</div>
+    <div class="rv-sh">Professional Summary</div>
+    <div class="rv-summary">${d.summary}</div>
+    <div class="rv-sh">Core Competencies</div>
+    <div class="rv-tags">${(d.skills||[]).map(s=>`<span class="rv-tag">${s}</span>`).join('')}</div>
+    ${d.experience?.length?`<div class="rv-sh">Professional Experience</div>${d.experience.map(e=>`
+      <div class="rv-entry">
+        <div class="rv-etitle">${e.title}${e.company?' | '+e.company:''}</div>
+        <div class="rv-emeta">${e.period||''}</div>
+        <ul>${(e.bullets||[]).map(b=>`<li>${b}</li>`).join('')}</ul>
+      </div>`).join('')}`:''}
+    ${d.education?`<div class="rv-sh">Education</div><div class="rv-summary">${d.education}</div>`:''}
+    ${d.certifications?`<div class="rv-sh">Certifications & Achievements</div><div class="rv-summary">${d.certifications}</div>`:''}
+    ${d.ats_note?`<div class="rv-ats-note">🤖 ATS Note: ${d.ats_note}</div>`:''}
+  </div>`;
+}
+
+function copyResume(pvId){
+  const el=document.getElementById(pvId);
+  navigator.clipboard.writeText(el.innerText)
+    .then(()=>toast('Copied to clipboard!'))
+    .catch(()=>toast('Select and copy manually.'));
+}
+</script>
+</body>
+</html>
