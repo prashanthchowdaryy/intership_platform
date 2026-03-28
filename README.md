@@ -2,6 +2,7 @@
 Students lack real internships and hands-on experience, leading to weak portfolios. This platform offers task-based internships, and certificates to build skills.
 
 # SkillForge AI
+demo link:https://69c7a045b90fa853061bc7fb--curious-froyo-74453f.netlify.app/
 
 SkillForge AI is a task-based internship and skill verification platform designed to help students prove their abilities through real work instead of relying on traditional certificates.
 
